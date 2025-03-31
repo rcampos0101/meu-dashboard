@@ -2,14 +2,61 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import os
 
 # Configurações da página
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="Dashboard Financeiro - Composição de Despesas",
+    page_icon="📊",
+    layout="wide"
+)
+
+# Cabeçalho personalizado com logo e descrição
+st.markdown("""
+<style>
+    .titulo-principal {
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    .subtitulo {
+        font-size: 18px;
+        color: #555;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    .logo {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+    .footer {
+        text-align: center;
+        font-size: 14px;
+        color: #888;
+        padding: 20px 0;
+        border-top: 1px solid #eee;
+        margin-top: 40px;
+    }
+</style>
+<div class="logo">
+    <img src="https://raw.githubusercontent.com/rcampos0101/meu-repositorio/main/good1.ico" alt="Logo" width="60">
+</div>
+<div class="titulo-principal">📊 Dashboard Financeiro</div>
+<div class="subtitulo">Visualize a evolução mensal das contas contábeis de forma interativa.</div>
+""", unsafe_allow_html=True)
+
+# Verificar existência do arquivo
+FILE_NAME = "DADOS to AI Testing.xlsx"
+if not os.path.exists(FILE_NAME):
+    st.error(f"⚠️ O arquivo '{FILE_NAME}' não foi encontrado no diretório do app.")
+    st.stop()
 
 # Carregar dados
 @st.cache_data
 def load_data():
-    df = pd.read_excel("DADOS to AI Testing.xlsx", sheet_name="Dados para AI- Light")
+    df = pd.read_excel(FILE_NAME, sheet_name="Dados para AI- Light")
     df.replace([1, 11], 0, inplace=True)
     for col in df.columns[1:]:
         df[col] = pd.to_numeric(df[col], errors='coerce')
@@ -57,6 +104,22 @@ with col_grafico:
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    # Botão de download dos dados filtrados
+    st.download_button(
+        label="📥 Baixar dados filtrados em CSV",
+        data=df_filtrado.to_csv(index=False).encode('utf-8'),
+        file_name="dados_filtrados.csv",
+        mime="text/csv"
+    )
+
+    # Link de compartilhamento do app
+    st.markdown("""
+    <br>
+    <a href="https://share.streamlit.io/rcampos0101/meu-repositorio/main/dashboard.py" target="_blank" style="text-decoration:none;">
+        📤 Compartilhar este dashboard
+    </a>
+    """, unsafe_allow_html=True)
+
 # Cálculos dos cards
 df_totais = df.set_index("Conta Contábil")
 receita = df_totais.loc["Receita Líquida", "total"]
@@ -68,3 +131,10 @@ col1, col2, col3 = st.columns(3)
 col1.metric("Receita Líquida", f"R$ {receita:,.2f}".replace(",", "."))
 col2.metric("Total Despesas", f"R$ {abs(despesas):,.2f}".replace(",", "."))
 col3.metric("Resultado Geral", f"R$ {resultado:,.2f}".replace(",", "."))
+
+# Rodapé
+st.markdown("""
+<div class="footer">
+    Desenvolvido por <strong>Sistemas Intuitivos</strong> · © 2025
+</div>
+""", unsafe_allow_html=True)
