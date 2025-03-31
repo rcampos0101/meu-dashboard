@@ -4,8 +4,7 @@ import streamlit as st
 import plotly.graph_objects as go
 
 st.set_page_config(page_title="Dashboard Financeiro", layout="wide")
-
-st.title("📊 Dashboard Financeiro Interativo")
+st.title("📊 Meu Dashboard Financeiro")
 
 uploaded_file = st.file_uploader("📎 Envie a planilha com a aba 'Dados para AI- Light'", type="xlsx")
 
@@ -35,5 +34,4 @@ if uploaded_file:
         fig.add_trace(go.Scatter(x=df_mensal_t.index, y=df_mensal_t[conta], mode='lines', name=conta, line=dict(width=0.5)))
 
     fig.update_layout(title="📊 Evolução Mensal das Contas", xaxis_title="Mês", yaxis_title="Valor", plot_bgcolor='white')
-
     st.plotly_chart(fig, use_container_width=True)
